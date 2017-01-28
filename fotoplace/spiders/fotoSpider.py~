@@ -1,0 +1,55 @@
+import scrapy
+from scrapy.selector import Selector
+from fotoplace.items import FotoplaceItem
+import zlib
+from cookielib import CookieJar
+import hmac
+from hashlib import sha256
+import time
+
+
+
+
+class FotoSpider(scrapy.Spider):
+    name = "fotoplacespider"
+    domain = 'http://www.fotoplace.cc'
+    headers = {
+        'Client-Agent': 'b35d7751bc8ef46b87892a6abcb8f8/3.3.1/66/358081050313467/5.1.1/C6806/5489559a-2cc1-41f5-bb97-ca8895b88e16',
+        'Accept-Language': 'en_US',
+        'TimeZone': 'America/Chicago',
+        'timestamp': '',  # '1466996191370',#'1466886002629',
+        'token': '', #''d552dbebf6f23f262f1c89a198483dff5585032bf8baf995a6ca4fac6be2f188',
+        # 'cf8c45445c34617ec5812fb17426d11debc82090cff4dc791c13c4a9472b2c78',#'32982e9677376c8a485665843510d3d4bd0f2b1e028699d926a2a515dc9d2e12',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Content-Length': '52',
+        'Host': 'www.fotoplace.cc',
+        'Connection': 'Keep-Alive',
+        'Accept-Encoding': 'gzip',
+        'User-Agent': 'okhttp/2.4.0',
+    }
+    key = 'b35d7751bc8ef46b87892a6abcb8f86ede884481ef2e94aa49a7b48fffd4c13c'
+    h = hmac.new(key, '', sha256)
+    updateStr = 'appId=b35d7751bc8ef46b87892a6abcb8f8&appUUID=5489559a-2cc1-41f5-bb97-ca8895b88e16&timestamp='
+
+    def start_requests(self):
+        loginData = 'countryNo=1&mobileNo=8178211373&password=ghcwj521512'
+        cookiJar = CookieJar()
+        self.headers['timestamp'] = str(int(time.time()*1000))
+        self.h.update(self.updateStr+self.headers['timestamp'])
+        self.headers['token'] = self.h.hexdigest()
+
+        yield scrapy.Request(
+            url = self.domain,
+            headers = self.headers,
+            meta={
+                #'proxy': ''#UsersConfig['proxy'],
+                'cookiejar': 1
+            },
+            callback = self.logged
+        )
+
+    def logged(self):
+        print response
+        print 'hello world!'
+
+
